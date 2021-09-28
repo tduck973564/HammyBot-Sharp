@@ -76,7 +76,7 @@ namespace HammyBot
 
         static bool IsInitialised()
         {
-            return File.Exists("./config.json") && File.Exists("./log.txt") && Directory.Exists("./guilds");
+            return File.Exists("./config.json") && File.Exists("./log.txt") && Directory.Exists("./storage");
         }
         
         static void LoggingSetup()
