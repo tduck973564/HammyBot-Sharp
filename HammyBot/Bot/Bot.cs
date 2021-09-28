@@ -14,7 +14,7 @@ namespace HammyBot.Bot
 
         public Bot(Config config, Storage storage)
         {
-            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
+            AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
             this.Config = config;
             this.Storage = storage;
         }

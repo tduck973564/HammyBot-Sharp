@@ -2,21 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using NLog;
 
 #nullable enable
 namespace HammyBot
 {
     public class Storage
     {
-        public Dictionary<int, GuildConfig> GuildDict;
-        private string Folder;
+        public Dictionary<int, GuildConfig>? GuildDict;
+        private string? _folder;
 
         public static Storage Load(string folder)
         {
             Storage output = new Storage();
 
-            output.Folder = folder;
+            output._folder = folder;
             output.GuildDict = new Dictionary<int, GuildConfig>();
 
             foreach (string file in Directory.GetFiles(folder))
@@ -35,9 +34,10 @@ namespace HammyBot
         public void Save()
         {
             string previousDirectory = Directory.GetCurrentDirectory();
-            Directory.SetCurrentDirectory(Folder);
+
+            Directory.SetCurrentDirectory(_folder!);
             
-            foreach (KeyValuePair<int, GuildConfig> item in GuildDict)
+            foreach (KeyValuePair<int, GuildConfig> item in GuildDict!)
             {
                 //string serializedClass = File.ReadAllText(item.Key.ToString());
                 File.WriteAllText(item.Key.ToString(), JsonSerializer.Serialize(item.Value));
@@ -49,13 +49,13 @@ namespace HammyBot
         public GuildConfig Get(int guildId)
         {
             CreateIfNotExists(guildId);
-            return GuildDict[guildId];
+            return GuildDict![guildId];
         }
 
         public void Set(int guildId, GuildConfig guildConfig)
         {
             GuildConfig? _;
-            if (!GuildDict.TryGetValue(guildId, out _))
+            if (!GuildDict!.TryGetValue(guildId, out _))
                 Program.Logger.Warn("Set GuildConfig that does not exist.");
                     
             GuildDict[guildId] = guildConfig;
@@ -64,7 +64,7 @@ namespace HammyBot
         private void CreateIfNotExists(int guildId)
         {
             GuildConfig? _;
-            if (!GuildDict.TryGetValue(guildId, out _))
+            if (!GuildDict!.TryGetValue(guildId, out _))
                 GuildDict.Add(guildId, new GuildConfig());
         }
     }

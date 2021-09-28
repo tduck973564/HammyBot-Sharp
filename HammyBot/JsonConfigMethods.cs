@@ -36,7 +36,7 @@ namespace HammyBot
             File.WriteAllText(path, serializedClass);
         }
         
-        public Object? Get(string property)
+        public object? Get(string property)
         {
             return GetType().GetProperty(property)?.GetValue(this, null);
         }
