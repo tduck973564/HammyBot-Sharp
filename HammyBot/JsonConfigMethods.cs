@@ -13,7 +13,9 @@ namespace HammyBot
         public static T Load<T>(string path)
         {
             string serializedClass = File.ReadAllText(path);
-            return JsonSerializer.Deserialize<T>(serializedClass);
+            T? output = JsonSerializer.Deserialize<T>(serializedClass);
+            if (output == null) throw new NullReferenceException("Deserialized class was Null.");
+            return output;
         }
 
         public void Save(string path)

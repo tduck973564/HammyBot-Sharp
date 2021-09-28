@@ -7,9 +7,13 @@ namespace HammyBot
 {
     internal class Options
     {
-        [Option("config_file", Default = "./config.json",
-            HelpText = "The path to the config JSON file (includes the bot token and such).")]
-        public string ConfigPath { get; set; } = "./config.json";
+        [Verb("run", HelpText = "Initialises the directory with the default files and paths.")]
+        public class RunOptions
+        {
+            [Option("config_file", Default = "./config.json",
+                HelpText = "The path to the config JSON file (includes the bot token and such).")]
+            public string ConfigPath { get; set; } = "./config.json";
+        }
 
         [Verb("init", HelpText = "Initialises the directory with the default files and paths.")]
         public class InitOptions {};
@@ -18,18 +22,20 @@ namespace HammyBot
     {
         static int Main(string[] args)
         {
-            return Parser.Default.ParseArguments<Options, Options.InitOptions>(args)
+            
+            return Parser.Default.ParseArguments<Options.RunOptions, Options.InitOptions>(args)
                 .MapResult(
-                    (Options opts) => RunBot(opts),
+                    (Options.RunOptions opts) => RunBot(opts),
                     (Options.InitOptions opts) => Initialise(opts),
                     errs => 1);
         }
 
-        static int RunBot(Options opts)
+        static int RunBot(Options.RunOptions opts)
         {
             Config config = JsonConfigMethods.Load<Config>(opts.ConfigPath);
+            
             Console.WriteLine(config.Token);
-            config.Save(opts.ConfigPath);
+
             // Run bot here.
             return 1;
         }
