@@ -2,12 +2,24 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
-using Discord.Audio.Streams;
-using HammyBot.GuildStorage;
 
 #nullable enable
 namespace HammyBot
 {
+    public class TypeArgumentException : Exception
+    {
+        public TypeArgumentException()
+        {
+        }
+        public TypeArgumentException(string message)
+            : base(message)
+        {
+        }
+        public TypeArgumentException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
+    }
     public class JsonConfigMethods
     {
         public static T Load<T>(string path)

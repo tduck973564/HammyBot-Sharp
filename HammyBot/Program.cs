@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Xml.Schema;
 using CommandLine;
 using NLog;
 
@@ -19,7 +20,7 @@ namespace HammyBot
         [Verb("init", HelpText = "Initialises the directory with the default files and paths.")]
         public class InitOptions {};
     }
-    static class Program
+    class Program
     {
         public static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
         static int Main(string[] args)
@@ -44,8 +45,9 @@ namespace HammyBot
         static int RunBot(Options.RunOptions opts)
         {
             Config config = JsonConfigMethods.Load<Config>(opts.ConfigPath);
-
-            new Bot.Bot(config.Token).MainAsync().GetAwaiter().GetResult();
+            Storage storage = Storage.Load("./storage");
+            
+            new Bot.Bot(config, storage).MainAsync().GetAwaiter().GetResult();
             
             return 0;
         }
@@ -53,7 +55,9 @@ namespace HammyBot
         static int Initialise(Options.InitOptions opts)
         {
             Logger.Info("Initialising directory...");
-            Directory.CreateDirectory("./guilds");
+            
+            if (!Directory.Exists("./storage"))
+                Directory.CreateDirectory("./storage");
             
             if (!File.Exists("./config.json")) 
                 File.Create("./config.json");
