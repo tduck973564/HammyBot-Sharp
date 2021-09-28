@@ -9,15 +9,19 @@ namespace HammyBot
 { 
     static class Options
     {
-        [Verb("run", HelpText = "Initialises the directory with the default files and paths. This is run by default when the directory is uninitialised.")]
+        [Verb("run", HelpText = "Runs the bot, taking the token from `config.json`")]
         public class RunOptions
         {
             [Option("config_file", Default = "./config.json",
                 HelpText = "The path to the config JSON file (includes the bot token and such).")]
             public string ConfigPath { get; set; } = "./config.json";
+
+            [Option("storage_path", Default = "./storage",
+                HelpText = "The path to the guild storage directory.")]
+            public string StoragePath { get; set; } = "./config.json";
         }
 
-        [Verb("init", HelpText = "Initialises the directory with the default files and paths.")]
+        [Verb("init", HelpText = "Initialises the directory with the default files and paths. This is run by default when the directory is uninitialised.")]
         public class InitOptions {};
     }
     class Program
@@ -45,7 +49,7 @@ namespace HammyBot
         static int RunBot(Options.RunOptions opts)
         {
             Config config = JsonConfigMethods.Load<Config>(opts.ConfigPath);
-            Storage storage = Storage.Load("./storage");
+            Storage storage = Storage.Load(opts.StoragePath);
             
             new Bot.Bot(config, storage).MainAsync().GetAwaiter().GetResult();
             

@@ -18,10 +18,7 @@ namespace HammyBot
 
             output.Folder = folder;
             output.GuildDict = new Dictionary<int, GuildConfig>();
-            
-            string previousDirectory = Directory.GetCurrentDirectory();
-            Directory.SetCurrentDirectory(folder);
-            
+
             foreach (string file in Directory.GetFiles(folder))
             {
                 string serializedClass = File.ReadAllText(file);
@@ -31,9 +28,7 @@ namespace HammyBot
                 
                 output.GuildDict.Add(int.Parse(file), deserialisedClass);
             }
-            
-            Directory.SetCurrentDirectory(previousDirectory);
-            
+
             return output;
         }
 
