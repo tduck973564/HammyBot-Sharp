@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
+using Discord.Audio.Streams;
 using HammyBot.GuildStorage;
 
 #nullable enable
@@ -9,7 +10,7 @@ namespace HammyBot
 {
     public class JsonConfigMethods
     {
-        public static T? Load<T>(string path)
+        public static T Load<T>(string path)
         {
             string serializedClass = File.ReadAllText(path);
             return JsonSerializer.Deserialize<T>(serializedClass);

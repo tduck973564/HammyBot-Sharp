@@ -5,15 +5,16 @@ using CommandLine;
 #nullable enable
 namespace HammyBot
 {
-    class Options
+    internal class Options
     {
-        [Option("config_file", Default = "./config.json", HelpText = "The path to the config JSON file (includes the bot token and such).")]
-        public string? ConfigPath { get; set; }
+        [Option("config_file", Default = "./config.json",
+            HelpText = "The path to the config JSON file (includes the bot token and such).")]
+        public string ConfigPath { get; set; } = "./config.json";
 
         [Verb("init", HelpText = "Initialises the directory with the default files and paths.")]
         public class InitOptions {};
     }
-    class Program
+    internal static class Program
     {
         static int Main(string[] args)
         {
@@ -26,7 +27,7 @@ namespace HammyBot
 
         static int RunBot(Options opts)
         {
-            Config config = Config.Load(opts.ConfigPath);
+            Config config = JsonConfigMethods.Load<Config>(opts.ConfigPath);
             Console.WriteLine(config.Token);
             config.Save(opts.ConfigPath);
             // Run bot here.
@@ -43,7 +44,7 @@ namespace HammyBot
             File.WriteAllText("./config.json", "{}");
             
             // Puts the config options in the JSON file.
-            Config.Load("./config.json").Save("./config.json");
+            JsonConfigMethods.Load<Config>("./config.json").Save("./config.json");
             
             Console.WriteLine("Initialised directory.");
             
