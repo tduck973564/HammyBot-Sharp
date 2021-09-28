@@ -1,13 +1,14 @@
 ﻿using System;
 using System.IO;
 using CommandLine;
+using NLog;
 
 #nullable enable
 namespace HammyBot
-{
-    internal class Options
+{ 
+    static class Options
     {
-        [Verb("run", HelpText = "Initialises the directory with the default files and paths.")]
+        [Verb("run", HelpText = "Initialises the directory with the default files and paths. This is run by default when the directory is uninitialised.")]
         public class RunOptions
         {
             [Option("config_file", Default = "./config.json",
@@ -18,14 +19,24 @@ namespace HammyBot
         [Verb("init", HelpText = "Initialises the directory with the default files and paths.")]
         public class InitOptions {};
     }
-    internal static class Program
+    static class Program
     {
+        public static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
         static int Main(string[] args)
         {
-            
+            LoggingSetup();
             return Parser.Default.ParseArguments<Options.RunOptions, Options.InitOptions>(args)
                 .MapResult(
-                    (Options.RunOptions opts) => RunBot(opts),
+                    (Options.RunOptions opts) =>
+                    {
+                        if (!IsInitialised())
+                        {
+                            Logger.Warn("Directory not fully initialised, reinitialising.");
+                            Initialise(new Options.InitOptions());
+                        }
+                            
+                        return RunBot(opts);
+                    },
                     (Options.InitOptions opts) => Initialise(opts),
                     errs => 1);
         }
@@ -33,16 +44,15 @@ namespace HammyBot
         static int RunBot(Options.RunOptions opts)
         {
             Config config = JsonConfigMethods.Load<Config>(opts.ConfigPath);
-            
-            Console.WriteLine(config.Token);
 
-            // Run bot here.
-            return 1;
+            new Bot.Bot(config.Token).MainAsync().GetAwaiter().GetResult();
+            
+            return 0;
         }
 
         static int Initialise(Options.InitOptions opts)
         {
-            Console.WriteLine("Initialising directory...");
+            Logger.Info("Initialising directory...");
             Directory.CreateDirectory("./guilds");
             
             if (!File.Exists("./config.json")) 
@@ -52,9 +62,30 @@ namespace HammyBot
             // Puts the config options in the JSON file.
             JsonConfigMethods.Load<Config>("./config.json").Save("./config.json");
             
-            Console.WriteLine("Initialised directory.");
+            if (!File.Exists("./log.txt")) 
+                File.Create("./log.txt");
             
-            return 1;
+            Logger.Info("Initialised directory.");
+            
+            return 0;
+        }
+
+        static bool IsInitialised()
+        {
+            return File.Exists("./config.json") && File.Exists("./log.txt") && Directory.Exists("./guilds");
+        }
+        
+        static void LoggingSetup()
+        {
+            var config = new NLog.Config.LoggingConfiguration();
+            
+            var logfile = new NLog.Targets.FileTarget("logfile") { FileName = "log.txt" };
+            var logconsole = new NLog.Targets.ConsoleTarget("logconsole");
+            
+            config.AddRule(LogLevel.Info, LogLevel.Fatal, logconsole);
+            config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
+            
+            NLog.LogManager.Configuration = config;
         }
     }
 }
