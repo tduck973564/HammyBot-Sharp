@@ -2,6 +2,7 @@
 using System.IO;
 using System.Xml.Schema;
 using CommandLine;
+using Discord.WebSocket;
 using NLog;
 
 #nullable enable
