@@ -1,3 +1,19 @@
+// HammyBot Sharp - HammyBot Sharp
+//     Copyright (C) 2021 Thomas Duckworth <tduck973564@gmail.com>
+// 
+//     This program is free software: you can redistribute it and/or modify
+//     it under the terms of the GNU General Public License as published by
+//     the Free Software Foundation, either version 3 of the License, or
+//     (at your option) any later version.
+// 
+//     This program is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//     GNU General Public License for more details.
+// 
+//     You should have received a copy of the GNU General Public License
+//     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -17,7 +33,6 @@ namespace HammyBot_Sharp.Bot.Modules
             if (user == null)
             {
                 await Context.Channel.SendMessageAsync(echo);
-                
             }
             else
             {
@@ -33,8 +48,8 @@ namespace HammyBot_Sharp.Bot.Modules
         {
             await Context.Channel.SendMessageAsync(
                 embed: Embeds.Embed(
-                    Color.Blue, 
-                    "Pong!", 
+                    Color.Blue,
+                    "Pong!",
                     "`API Latency:".PadRight(15) + $"{Client!.Latency.ToString()}ms`"
                 )
             );

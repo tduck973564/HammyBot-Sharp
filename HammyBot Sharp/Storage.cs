@@ -1,3 +1,19 @@
+// HammyBot Sharp - HammyBot Sharp
+//     Copyright (C) 2021 Thomas Duckworth <tduck973564@gmail.com>
+// 
+//     This program is free software: you can redistribute it and/or modify
+//     it under the terms of the GNU General Public License as published by
+//     the Free Software Foundation, either version 3 of the License, or
+//     (at your option) any later version.
+// 
+//     This program is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//     GNU General Public License for more details.
+// 
+//     You should have received a copy of the GNU General Public License
+//     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,12 +24,12 @@ namespace HammyBot_Sharp
 {
     public class Storage
     {
-        public Dictionary<int, GuildConfig>? GuildDict;
         private string? _folder;
+        public Dictionary<int, GuildConfig>? GuildDict;
 
         public static Storage Load(string folder)
         {
-            Storage output = new Storage();
+            Storage output = new();
 
             output._folder = folder;
             output.GuildDict = new Dictionary<int, GuildConfig>();
@@ -21,10 +37,10 @@ namespace HammyBot_Sharp
             foreach (string file in Directory.GetFiles(folder))
             {
                 string serializedClass = File.ReadAllText(file);
-                GuildConfig? deserialisedClass = JsonSerializer.Deserialize<GuildConfig>(serializedClass);
-                
+                var deserialisedClass = JsonSerializer.Deserialize<GuildConfig>(serializedClass);
+
                 if (deserialisedClass == null) throw new NullReferenceException("Deserialized class was Null.");
-                
+
                 output.GuildDict.Add(int.Parse(file), deserialisedClass);
             }
 
@@ -36,13 +52,11 @@ namespace HammyBot_Sharp
             string previousDirectory = Directory.GetCurrentDirectory();
 
             Directory.SetCurrentDirectory(_folder!);
-            
-            foreach (KeyValuePair<int, GuildConfig> item in GuildDict!)
-            {
+
+            foreach (var item in GuildDict!)
                 //string serializedClass = File.ReadAllText(item.Key.ToString());
                 File.WriteAllText(item.Key.ToString(), JsonSerializer.Serialize(item.Value));
-            }
-            
+
             Directory.SetCurrentDirectory(previousDirectory);
         }
 
@@ -57,7 +71,7 @@ namespace HammyBot_Sharp
             GuildConfig? _;
             if (!GuildDict!.TryGetValue(guildId, out _))
                 Program.Logger.Warn("Set GuildConfig that does not exist.");
-                    
+
             GuildDict[guildId] = guildConfig;
         }
 
