@@ -4,7 +4,10 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 
-HammyBot/config.json
+HammyBot Sharp/config.json
+HammyBot Sharp/storage
+HammyBot Sharp/log.txt
+
 # Default ignored files
 /shelf/
 /workspace.xml
