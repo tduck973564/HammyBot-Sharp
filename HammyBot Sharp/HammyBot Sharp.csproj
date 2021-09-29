@@ -8,14 +8,19 @@
         <Company>Thomas Duckworth &lt;tduck973564@gmail.com&gt;</Company>
         <Product>HammyBot Sharp</Product>
         <AssemblyName>HammyBot Sharp</AssemblyName>
-        <PackageId>HammyBot Sharp</PackageId>
+        <PackageId>HammyBot-Sharp</PackageId>
+        <PackageProjectUrl>https://github.com/tduck973564/HammyBot-Sharp</PackageProjectUrl>
+        <PackageLicenseUrl>https://www.gnu.org/licenses/</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/tduck973564/HammyBot-Sharp</RepositoryUrl>
+        <RepositoryType>Git</RepositoryType>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CommandLineParser" Version="2.9.0-preview1"/>
-        <PackageReference Include="Discord.Net" Version="2.4.0"/>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0-rc.1.21451.13"/>
-        <PackageReference Include="NLog" Version="5.0.0-preview.1"/>
+        <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
+        <PackageReference Include="Discord.Net" Version="2.4.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0-rc.1.21451.13" />
+        <PackageReference Include="NLog" Version="5.0.0-preview.1" />
     </ItemGroup>
 
 </Project>
