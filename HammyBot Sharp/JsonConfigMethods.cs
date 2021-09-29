@@ -3,7 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Text.Json;
 
-namespace HammyBot
+namespace HammyBot_Sharp
 {
     public class TypeArgumentException : Exception
     {

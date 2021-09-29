@@ -4,7 +4,7 @@ using System.IO;
 using System.Text.Json;
 
 #nullable enable
-namespace HammyBot
+namespace HammyBot_Sharp
 {
     public class Storage
     {

@@ -3,7 +3,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 
-namespace HammyBot.Bot.Modules
+namespace HammyBot_Sharp.Bot.Modules
 {
     public class Base : ModuleBase<SocketCommandContext>
     {

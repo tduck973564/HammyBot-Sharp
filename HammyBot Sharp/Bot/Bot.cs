@@ -5,7 +5,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace HammyBot.Bot
+namespace HammyBot_Sharp.Bot
 {
     public class Bot
     {

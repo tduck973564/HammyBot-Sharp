@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HammyBot", "HammyBot\HammyBot.csproj", "{98841F24-EAAB-4D98-9FF0-7B8C2F54A11A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HammyBot Sharp", "HammyBot Sharp\HammyBot Sharp.csproj", "{98841F24-EAAB-4D98-9FF0-7B8C2F54A11A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

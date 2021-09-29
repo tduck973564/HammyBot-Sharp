@@ -1,4 +1,4 @@
-namespace HammyBot
+namespace HammyBot_Sharp
 {
     public class Config: JsonConfigMethods
     {

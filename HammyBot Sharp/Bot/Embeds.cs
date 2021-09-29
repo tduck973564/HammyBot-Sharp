@@ -1,7 +1,7 @@
 using System;
 using Discord;
 
-namespace HammyBot.Bot
+namespace HammyBot_Sharp.Bot
 {
     public static class Embeds
     {
