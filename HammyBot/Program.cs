@@ -1,11 +1,9 @@
-﻿using System;
-using System.IO;
-using System.Xml.Schema;
+﻿using System.IO;
 using CommandLine;
-using Discord.WebSocket;
 using NLog;
+using NLog.Config;
+using NLog.Targets;
 
-#nullable enable
 namespace HammyBot
 { 
     static class Options
@@ -86,10 +84,10 @@ namespace HammyBot
         
         static void LoggingSetup()
         {
-            var config = new NLog.Config.LoggingConfiguration();
+            LoggingConfiguration config = new NLog.Config.LoggingConfiguration();
             
-            var logfile = new NLog.Targets.FileTarget("logfile") { FileName = "log.txt" };
-            var logconsole = new NLog.Targets.ConsoleTarget("logconsole");
+            FileTarget logfile = new NLog.Targets.FileTarget("logfile") { FileName = "log.txt" };
+            ConsoleTarget logconsole = new NLog.Targets.ConsoleTarget("logconsole");
             
             config.AddRule(LogLevel.Info, LogLevel.Fatal, logconsole);
             config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);

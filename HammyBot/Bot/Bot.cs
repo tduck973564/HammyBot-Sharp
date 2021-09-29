@@ -1,30 +1,29 @@
 using System.Threading.Tasks;
 using System;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 
-#nullable enable
 namespace HammyBot.Bot
 {
     public class Bot
     {
-        private DiscordSocketClient _client;
-        private CommandService _commands;
-        private CommandHandler _commandHandler;
+        private readonly DiscordSocketClient _client;
+        private readonly CommandService _commands;
+        private readonly CommandHandler _commandHandler;
 
-        public Config Config;
-        public Storage Storage;
+        private Config _config;
+        private Storage _storage;
         
         public Bot(Config config, Storage storage)
         {
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
             Console.CancelKeyPress += OnProcessExit;
-            Config = config;
-            Storage = storage;
+            
+            _config = config;
+            _storage = storage;
+            
             _client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 LogLevel = LogSeverity.Info,
@@ -34,8 +33,8 @@ namespace HammyBot.Bot
                 LogLevel = LogSeverity.Info
             });
             _commandHandler = new CommandHandler(
-                _client, _commands, Config,
-                new Initialise(_commands, _client, Storage).BuildServiceProvider()
+                _client, _commands, _config,
+                BuildServiceProvider()
             );
         }
         
@@ -44,10 +43,11 @@ namespace HammyBot.Bot
             _client.Log += Log;
             _commands.Log += Log;
 
-            await _client.LoginAsync(TokenType.Bot, Config.Token);
+            await _client.LoginAsync(TokenType.Bot, _config.Token);
             await _client.StartAsync();
             await _commandHandler.InitializeAsync();
             
+            // Block until process exit
             await Task.Delay(-1);
         }
 
@@ -78,46 +78,26 @@ namespace HammyBot.Bot
             return Task.CompletedTask;
         }
         
-        private void OnProcessExit(object? obj, EventArgs eventArgs)
-        {
-            Program.Logger.Info("Exiting program. Saving current storage state.");
-            Storage.Save();
-        }
-    }
-
-    public class Initialise
-    {
-        private readonly CommandService _commands;
-        private readonly DiscordSocketClient _client;
-        private Storage _storage;
-
-        // Ask if there are existing CommandService and DiscordSocketClient
-        // instance. If there are, we retrieve them and add them to the
-        // DI container; if not, we create our own.
-        public Initialise(CommandService commands, DiscordSocketClient client, Storage storage)
-        {
-            _commands = commands;
-            _client = client;
-            _storage = storage;
-        }
-
-        public IServiceProvider BuildServiceProvider() => new ServiceCollection()
+        private IServiceProvider BuildServiceProvider() => new ServiceCollection()
             .AddSingleton(_client)
             .AddSingleton(_commands)
             .AddSingleton(_storage)
-            // The benefit of using the generic method is that 
-            // ASP.NET DI will attempt to inject the required
-            // dependencies that are specified under the constructor 
-            // for us.
-            .AddSingleton<CommandHandler>()
+            .AddSingleton(_config)
             .BuildServiceProvider();
+        
+        private void OnProcessExit(object? obj, EventArgs eventArgs)
+        {
+            Program.Logger.Info("Exiting program. Saving current storage state.");
+            _storage.Save();
+        }
     }
+    
     public class CommandHandler
     {
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
         private readonly IServiceProvider _services;
-        private Config _config;
+        private readonly Config _config;
 
         // Retrieve client and CommandService instance via ctor
         public CommandHandler(DiscordSocketClient client, CommandService commands, Config config, IServiceProvider services)
@@ -139,8 +119,12 @@ namespace HammyBot.Bot
             // If you do not use Dependency Injection, pass null.
             // See Dependency Injection guide for more information.
             await _commands.AddModuleAsync<Modules.Base>(services: _services);
+            
             // Hook the MessageReceived event into our command handler
             _client.MessageReceived += HandleCommandAsync;
+            
+            // Hook the CommandExecuted event into OnCommandExecutedAsync
+            _commands.CommandExecuted += OnCommandExecutedAsync;
         }
 
         private async Task HandleCommandAsync(SocketMessage messageParam)
@@ -153,7 +137,7 @@ namespace HammyBot.Bot
             int argPos = 0;
 
             // Determine if the message is a command based on the prefix and make sure no bots trigger commands
-            if (!(message.HasCharPrefix(_config.Prefix.ToCharArray()[0], ref argPos) || 
+            if (!(message.HasCharPrefix(_config.Prefix?.ToCharArray()[0] ?? ';', ref argPos) || 
                 message.HasMentionPrefix(_client.CurrentUser, ref argPos)) ||
                 message.Author.IsBot)
                 return;
@@ -163,10 +147,18 @@ namespace HammyBot.Bot
 
             // Execute the command with the command context we just
             // created, along with the service provider for precondition checks.
-            await _commands.ExecuteAsync(
-                context: context, 
-                argPos: argPos,
-                services: _services);
+            await _commands.ExecuteAsync(context, argPos, _services);
+        }
+
+        private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context,
+            IResult result)
+        {
+            if (!string.IsNullOrEmpty(result?.ErrorReason))
+            {
+                await context.Channel.SendMessageAsync(
+                    embed: Embeds.Embed(Color.Red, "An error occured!", result.ErrorReason)
+                );
+            }
         }
     }
 }

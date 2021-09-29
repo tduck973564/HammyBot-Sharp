@@ -3,6 +3,12 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <Authors>Thomas Duckworth &lt;tduck973564@gmail.com&gt;</Authors>
+        <Company>Thomas Duckworth &lt;tduck973564@gmail.com&gt;</Company>
+        <Product>HammyBot Sharp</Product>
+        <AssemblyName>HammyBot Sharp</AssemblyName>
+        <PackageId>HammyBot Sharp</PackageId>
     </PropertyGroup>
 
     <ItemGroup>
