@@ -8,7 +8,7 @@ namespace HammyBot
 { 
     static class Options
     {
-        [Verb("run", HelpText = "Runs the bot, taking the token from `config.json`")]
+        [Verb("run", HelpText = "Runs the bot, taking the token and prefix from `config.json`. Default prefix is ';'.")]
         public class RunOptions
         {
             [Option("config_file", Default = "./config.json",
