@@ -53,6 +53,7 @@ namespace HammyBot_Sharp.Bot
                 _client, _commands, _config,
                 BuildServiceProvider()
             );
+            _client.SetActivityAsync(new Game(_config.Status ?? "with matches"));
         }
 
         public async Task MainAsync()
@@ -140,6 +141,9 @@ namespace HammyBot_Sharp.Bot
             // If you do not use Dependency Injection, pass null.
             // See Dependency Injection guide for more information.
             await _commands.AddModuleAsync<Base>(_services);
+            await _commands.AddModuleAsync<Facts>(_services);
+            await _commands.AddModuleAsync<Settings>(_services);
+            await _commands.AddModuleAsync<Moderation>(_services);
 
             // Hook the MessageReceived event into our command handler
             _client.MessageReceived += HandleCommandAsync;

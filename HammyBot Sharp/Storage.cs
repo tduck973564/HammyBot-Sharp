@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 
 #nullable enable
@@ -25,25 +26,30 @@ namespace HammyBot_Sharp
     public class Storage
     {
         private string? _folder;
-        public Dictionary<int, GuildConfig>? GuildDict;
+        public Dictionary<ulong, GuildConfig>? GuildDict;
 
         public static Storage Load(string folder)
         {
             Storage output = new();
 
             output._folder = folder;
-            output.GuildDict = new Dictionary<int, GuildConfig>();
+            output.GuildDict = new Dictionary<ulong, GuildConfig>();
 
-            foreach (string file in Directory.GetFiles(folder))
+            string previousDirectory = Directory.GetCurrentDirectory();
+            Directory.SetCurrentDirectory(folder);
+            
+            foreach (string? file in Directory.GetFiles("./").Select(Path.GetFileName))
             {
-                string serializedClass = File.ReadAllText(file);
+                string serializedClass = File.ReadAllText(file!);
                 var deserialisedClass = JsonSerializer.Deserialize<GuildConfig>(serializedClass);
 
                 if (deserialisedClass == null) throw new NullReferenceException("Deserialized class was Null.");
-
-                output.GuildDict.Add(int.Parse(file), deserialisedClass);
+                
+                output.GuildDict.Add(ulong.Parse(file!), deserialisedClass);
             }
 
+            Directory.SetCurrentDirectory(previousDirectory);
+            
             return output;
         }
 
@@ -54,19 +60,18 @@ namespace HammyBot_Sharp
             Directory.SetCurrentDirectory(_folder!);
 
             foreach (var item in GuildDict!)
-                //string serializedClass = File.ReadAllText(item.Key.ToString());
                 File.WriteAllText(item.Key.ToString(), JsonSerializer.Serialize(item.Value));
 
             Directory.SetCurrentDirectory(previousDirectory);
         }
 
-        public GuildConfig Get(int guildId)
+        public GuildConfig Get(ulong guildId)
         {
             CreateIfNotExists(guildId);
             return GuildDict![guildId];
         }
 
-        public void Set(int guildId, GuildConfig guildConfig)
+        public void Set(ulong guildId, GuildConfig guildConfig)
         {
             GuildConfig? _;
             if (!GuildDict!.TryGetValue(guildId, out _))
@@ -75,7 +80,7 @@ namespace HammyBot_Sharp
             GuildDict[guildId] = guildConfig;
         }
 
-        private void CreateIfNotExists(int guildId)
+        private void CreateIfNotExists(ulong guildId)
         {
             GuildConfig? _;
             if (!GuildDict!.TryGetValue(guildId, out _))
@@ -85,6 +90,6 @@ namespace HammyBot_Sharp
 
     public class GuildConfig : JsonConfigMethods
     {
-        public int Muterole;
+        public ulong Muterole { get; set; }
     }
 }

@@ -66,12 +66,10 @@ namespace HammyBot_Sharp
         public void Set<T>(string property, T value)
         {
             var propertyInfo = GetType().GetProperty(property);
-            if (Get(property)?.GetType() != propertyInfo?.GetType())
-                throw new TypeArgumentException(
-                    "The type provided in the setter was not equal to the type in the config.");
 
             if (propertyInfo?.GetType() == null)
                 throw new NullReferenceException("The provided property does not exist on the class.");
+            
             propertyInfo.SetValue(this, value);
         }
     }

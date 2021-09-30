@@ -24,7 +24,6 @@ namespace HammyBot_Sharp.Bot.Modules
     public class Base : ModuleBase<SocketCommandContext>
     {
         public Config? Config { get; set; }
-        public Storage? Storage { get; set; }
         public DiscordSocketClient? Client { get; set; }
 
         [Command("echo")]
@@ -32,6 +31,7 @@ namespace HammyBot_Sharp.Bot.Modules
         {
             if (user == null)
             {
+                await Context.Message.DeleteAsync();
                 await Context.Channel.SendMessageAsync(echo);
             }
             else
@@ -46,11 +46,17 @@ namespace HammyBot_Sharp.Bot.Modules
         [Command("ping")]
         public async Task Ping()
         {
+            var message = await Context.Channel.SendMessageAsync("_ _");
+            await message.DeleteAsync();
+            
+            long messageLatency = message.Timestamp.ToUnixTimeMilliseconds() - Context.Message.Timestamp.ToUnixTimeMilliseconds();
+            
             await Context.Channel.SendMessageAsync(
                 embed: Embeds.Embed(
                     Color.Blue,
                     "Pong!",
-                    "`API Latency:".PadRight(15) + $"{Client!.Latency.ToString()}ms`"
+                    "`API Latency:".PadRight(15) + $"{Client!.Latency.ToString()}ms`",
+                    "`Msg Latency:".PadRight(15) + $"{messageLatency.ToString()}ms`"
                 )
             );
         }
