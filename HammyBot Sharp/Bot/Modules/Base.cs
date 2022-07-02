@@ -49,7 +49,7 @@ namespace HammyBot_Sharp.Bot.Modules
         public async Task Help(string moduleName)
         {
             var modules = _commands!.Modules.ToList();
-            string text = $"Commands in module {moduleName}:";
+            string text = $"Commands in module {moduleName}:\n";
 
             var module = modules.First(x => x.Name == moduleName);
 

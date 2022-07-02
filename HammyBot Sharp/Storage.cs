@@ -20,7 +20,6 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 
-#nullable enable
 namespace HammyBot_Sharp
 {
     public class Storage
