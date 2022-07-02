@@ -91,5 +91,7 @@ namespace HammyBot_Sharp
     public class GuildConfig : JsonConfigMethods
     {
         public ulong Muterole { get; set; }
+        public PerspectiveApiConfig? PerspectiveApi { get; set; }
+        public Dictionary<ulong, decimal>? SocialCredit { get; set; }
     }
 }

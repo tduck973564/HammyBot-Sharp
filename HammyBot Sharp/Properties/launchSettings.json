@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "HammyBot Sharp": {
+      "commandName": "Project",
+      "commandLineArgs": "run"
+    }
+  }
+}

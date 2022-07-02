@@ -70,6 +70,7 @@ namespace HammyBot_Sharp.Bot.Modules
         }
 
         [Command("fact")]
+        [Summary("Gives you a fun fact")]
         public async Task Fact()
         {
             var fact = await FactsHttp.GetFact();
@@ -79,6 +80,7 @@ namespace HammyBot_Sharp.Bot.Modules
         }
         
         [Command("funny")]
+        [Summary("Gives you a shitty Chuck Norris joke or, rarely, a good one")]
         public async Task Funny()
         {
             var fact = await FactsHttp.GetFunny();

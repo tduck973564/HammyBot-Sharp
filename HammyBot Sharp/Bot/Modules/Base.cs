@@ -14,6 +14,8 @@
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -25,8 +27,48 @@ namespace HammyBot_Sharp.Bot.Modules
     {
         public Config? Config { get; set; }
         public DiscordSocketClient? Client { get; set; }
+        public CommandService? _commands { get; set; }
+
+        [Command("help")]
+        [Summary("Lists the possible commands.")]
+        public async Task Help()
+        {
+            var modules = _commands!.Modules.ToList();
+            string text = "Modules:\n";
+
+            foreach (ModuleInfo module in modules)
+            {
+                text += $" {module.Name}\n";
+            }
+
+            await ReplyAsync($"```{text}```");
+        }
+
+        [Command("help")]
+        [Summary("Lists the possible commands.")]
+        public async Task Help(string moduleName)
+        {
+            var modules = _commands!.Modules.ToList();
+            string text = $"Commands in module {moduleName}:";
+
+            var module = modules.First(x => x.Name == moduleName);
+
+            if (module != null)
+            {
+                foreach (CommandInfo command in module.Commands.ToList())
+                {
+                    string summary = command.Summary ?? "No description available\n";
+
+                    text += $"\t{command.Name}: {summary}\n";
+                }
+
+                await ReplyAsync($"```{text}```");
+            }
+            else await ReplyAsync("Module not found. Use help command without arguments to see list of modules.");
+        }
 
         [Command("echo")]
+        [Summary("Sends a message in the channel it was called from or to a user.")]
         public async Task Echo(string echo, IUser? user = null)
         {
             if (user == null)
@@ -37,28 +79,38 @@ namespace HammyBot_Sharp.Bot.Modules
             else
             {
                 await user.SendMessageAsync(echo);
-                await Context.Channel.SendMessageAsync(
+                await ReplyAsync(
                     embed: Embeds.Embed(Color.Green, "Sent DM to user!")
                 );
             }
         }
 
         [Command("ping")]
+        [Summary("Gets the message and API latency of the bot.")]
         public async Task Ping()
         {
             var message = await Context.Channel.SendMessageAsync("_ _");
             await message.DeleteAsync();
-            
+
             long messageLatency = message.Timestamp.ToUnixTimeMilliseconds() - Context.Message.Timestamp.ToUnixTimeMilliseconds();
-            
-            await Context.Channel.SendMessageAsync(
+
+            await ReplyAsync(
                 embed: Embeds.Embed(
                     Color.Blue,
                     "Pong!",
-                    "`API Latency:".PadRight(15) + $"{Client!.Latency.ToString()}ms`",
-                    "`Msg Latency:".PadRight(15) + $"{messageLatency.ToString()}ms`"
+                    "`API Latency:".PadRight(15) + $"{Client!.Latency}ms`",
+                    "`Msg Latency:".PadRight(15) + $"{messageLatency}ms`"
                 )
             );
+        }
+
+        [Command("avatar")]
+        [Summary("Sends your (or the user you specify's) avatar.")]
+        public async Task Avatar(IUser? user = null)
+        {
+            user ??= Context.User;
+
+            await ReplyAsync(user.GetAvatarUrl());
         }
     }
 }

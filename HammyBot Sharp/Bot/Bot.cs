@@ -15,6 +15,7 @@
 //     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -50,7 +51,7 @@ namespace HammyBot_Sharp.Bot
                 LogLevel = LogSeverity.Info
             });
             _commandHandler = new CommandHandler(
-                _client, _commands, _config,
+                _client, _commands, _config, _storage,
                 BuildServiceProvider()
             );
             _client.SetActivityAsync(new Game(_config.Status ?? "with matches"));
@@ -118,15 +119,17 @@ namespace HammyBot_Sharp.Bot
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
         private readonly Config _config;
+        private readonly Storage _storage;
         private readonly IServiceProvider _services;
 
         // Retrieve client and CommandService instance via ctor
-        public CommandHandler(DiscordSocketClient client, CommandService commands, Config config,
+        public CommandHandler(DiscordSocketClient client, CommandService commands, Config config, Storage storage,
             IServiceProvider services)
         {
             _commands = commands;
-            _client = client;
-            _config = config;
+            _client   = client;
+            _config   = config;
+            _storage  = storage;
             _services = services;
         }
 
@@ -144,6 +147,11 @@ namespace HammyBot_Sharp.Bot
             await _commands.AddModuleAsync<Facts>(_services);
             await _commands.AddModuleAsync<Settings>(_services);
             await _commands.AddModuleAsync<Moderation>(_services);
+            await _commands.AddModuleAsync<Fun>(_services);
+            await _commands.AddModuleAsync<PerspectiveApi>(_services);
+            await _commands.AddModuleAsync<Covid19>(_services);
+            await _commands.AddModuleAsync<EmojiTools>(_services);
+            await _commands.AddModuleAsync<SocialCreditCommands>(_services);
 
             // Hook the MessageReceived event into our command handler
             _client.MessageReceived += HandleCommandAsync;
@@ -158,17 +166,47 @@ namespace HammyBot_Sharp.Bot
             var message = messageParam as SocketUserMessage;
             if (message == null) return;
 
+            // Create a WebSocket-based command context based on the message
+            var context = new SocketCommandContext(_client, message);
+
             // Create a number to track where the prefix ends and the command begins
             var argPos = 0;
 
-            // Determine if the message is a command based on the prefix and make sure no bots trigger commands
+            // Determine if the message is a command based on the prefix
+            var isCommand = true;
             if (!(message.HasCharPrefix(_config.Prefix?.ToCharArray()[0] ?? ';', ref argPos) ||
-                  message.HasMentionPrefix(_client.CurrentUser, ref argPos)) ||
-                message.Author.IsBot)
-                return;
+                  message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
+                isCommand = false;
 
-            // Create a WebSocket-based command context based on the message
-            var context = new SocketCommandContext(_client, message);
+            // Runs the Perspective AI on the message and change social credit based on output
+            var conf = _storage.Get(context.Guild.Id);
+
+            if (conf.PerspectiveApi != null && _config.PerspectiveApiKey != null)
+            {
+                var filtered = await conf.PerspectiveApi.CheckAndReport(context.Message.Content,
+                    context.Message.GetJumpUrl(),
+                    _config.PerspectiveApiKey,
+                    _client);
+
+                if (conf.SocialCredit == null)
+                    conf.SocialCredit = new Dictionary<ulong, decimal>();
+
+                decimal _;
+                if (!conf.SocialCredit!.TryGetValue(context.Message.Author.Id, out _))
+                    conf.SocialCredit!.Add(context.Message.Author.Id, 1000);
+
+                if (!isCommand)
+                    conf.SocialCredit[context.Message.Author.Id] += 0.1m;
+
+                if (filtered)
+                {
+                    conf.SocialCredit[context.Message.Author.Id] -= 10;
+                }
+
+                _storage.Set(context.Guild.Id, conf);
+            }
+
+            if (!isCommand) return;
 
             // Execute the command with the command context we just
             // created, along with the service provider for precondition checks.

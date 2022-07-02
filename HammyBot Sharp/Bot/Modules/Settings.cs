@@ -27,30 +27,14 @@ namespace HammyBot_Sharp.Bot.Modules
     {
         public Storage? Storage { get; set; }
 
-        [RequireUserPermission(GuildPermission.Administrator)]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
         [Command("set")]
-        public async Task Set(string type, string key, string value)
+        [Summary("Sets a setting specified by the key to the value you input. This probably doesn't work properly, and is a horrible abuse of the type system.")]
+        public async Task Set(string key, string value)
         {
             var storage = Storage!.Get(Context.Guild.Id);
-            object convertedValue;
+            object convertedValue = Convert.ChangeType(value, storage.Get(key)!.GetType());
 
-            switch (type)
-            {
-                case "int":
-                    convertedValue = Convert.ToInt32(value);
-                    break;
-                case "ulong":
-                    convertedValue = Convert.ToUInt64(value);
-                    break;
-                case "str":
-                    convertedValue = value;
-                    break;
-                default:
-                    throw new ArgumentException(
-                        "The type argument you inputted was invalid (the first argument). It must be either 'int' or 'str'."
-                    );
-            }
-            
             storage.Set(key, convertedValue);
             Storage.Set(Context.Guild.Id, storage);
                 
@@ -60,13 +44,14 @@ namespace HammyBot_Sharp.Bot.Modules
         }
 
         [Command("get")]
+        [Summary("Gets a setting by key.")]
         public async Task Get(string key)
         {
             await Context.Channel.SendMessageAsync(
                 embed: Embeds.Embed(
                     Color.Blue, 
                     "Setting got!", 
-                    Storage!.Get(Context.Guild.Id).Get(key)?.ToString() ?? $"Setting \"{key}\" not found or not set."
+                    Storage!.Get(Context.Guild.Id).Get(key)?.ToString() ?? $"Setting \"{key}\" does not exist or it is not set."
                 )
             );
         }

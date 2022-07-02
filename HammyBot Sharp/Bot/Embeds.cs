@@ -26,8 +26,11 @@ namespace HammyBot_Sharp.Bot
             {
                 Title = title,
                 Description = string.Join('\n', descriptions),
-                Color = colour
-            }.Build();
+                Color = colour,
+            }
+            .WithFooter(footer => footer.Text = "HammyBot Sharp")
+            .WithCurrentTimestamp()
+            .Build();
         }
     }
 }

@@ -22,18 +22,18 @@ using NLog.Targets;
 
 namespace HammyBot_Sharp
 {
-    internal static class Options
+    static class Options
     {
         [Verb("run", HelpText = "Runs the bot, taking the token and prefix from `config.json`. Default prefix is ';'.")]
         public class RunOptions
         {
-            [Option("config_file", Default = "./config.json",
+            [Option("config_file", Default = Program.ConfigFile,
                 HelpText = "The path to the config JSON file (includes the bot token and such).")]
-            public string ConfigPath { get; set; } = "./config.json";
+            public string ConfigPath { get; set; } = Program.ConfigFile;
 
-            [Option("storage_path", Default = "./storage",
+            [Option("storage_path", Default = Program.StorageDir,
                 HelpText = "The path to the guild storage directory.")]
-            public string StoragePath { get; set; } = "./config.json";
+            public string StoragePath { get; set; } = Program.StorageDir;
         }
 
         [Verb("init",
@@ -44,12 +44,17 @@ namespace HammyBot_Sharp
         }
     }
 
-    internal class Program
+    static class Program
     {
         public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+        public const string StorageDir   = "./storage";
+        public const string ConfigFile   = "./config.json";
+        public const string LogFile      = "./log.txt";
+
         private static int Main(string[] args)
         {
+            //InteractiveConsole.Start();
             LoggingSetup();
             return Parser.Default.ParseArguments<Options.RunOptions, Options.InitOptions>(args)
                 .MapResult(
@@ -72,6 +77,8 @@ namespace HammyBot_Sharp
             Config config = JsonConfigMethods.Load<Config>(opts.ConfigPath);
             Storage storage = Storage.Load(opts.StoragePath);
 
+            Covid19Service.StartHourlyDownloadService();
+
             new Bot.Bot(config, storage).MainAsync().GetAwaiter().GetResult();
 
             return 0;
@@ -81,18 +88,18 @@ namespace HammyBot_Sharp
         {
             Logger.Info("Initialising directory...");
 
-            if (!Directory.Exists("./storage"))
-                Directory.CreateDirectory("./storage");
+            if (!Directory.Exists(StorageDir))
+                Directory.CreateDirectory(StorageDir);
 
-            if (!File.Exists("./config.json"))
-                File.Create("./config.json");
-            File.WriteAllText("./config.json", "{}");
+            if (!File.Exists(ConfigFile))
+                File.Create(ConfigFile);
+            File.WriteAllText(ConfigFile, "{}");
 
             // Puts the config options in the JSON file.
-            JsonConfigMethods.Load<Config>("./config.json").Save("./config.json");
+            JsonConfigMethods.Load<Config>(ConfigFile).Save(ConfigFile);
 
-            if (!File.Exists("./log.txt"))
-                File.Create("./log.txt");
+            if (!File.Exists(LogFile))
+                File.Create(LogFile);
 
             Logger.Info("Initialised directory.");
 
@@ -101,7 +108,7 @@ namespace HammyBot_Sharp
 
         private static bool IsInitialised()
         {
-            return File.Exists("./config.json") && File.Exists("./log.txt") && Directory.Exists("./storage");
+            return File.Exists(ConfigFile) && File.Exists(LogFile) && Directory.Exists(StorageDir);
         }
 
         private static void LoggingSetup()
